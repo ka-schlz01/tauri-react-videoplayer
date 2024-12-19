@@ -6,6 +6,7 @@ import {appDataDir, BaseDirectory, join} from "@tauri-apps/api/path";
 import {readFile} from "@tauri-apps/plugin-fs";
 import VideoPlayerControl from "../components/VideoPlayerControl.tsx";
 import {Slider} from "@nextui-org/react";
+import {KeepAspect} from "../components/KeepAspect.tsx";
 
 interface PlayerState {
     isPlaying: boolean, volumeOpen: boolean, fullScreen: boolean, volume: number, showControls: boolean, loop: boolean, cinemaView: boolean
@@ -37,34 +38,30 @@ export default function VideoPlayer({autoplay = true}) {
         playerRef.current = player;
     };
 
-
-
     return (
         <div className={"bg-primary h-screen w-full"}>
             <div className={"flex flex-col h-full"}>
                 {
-                   videoSource != null &&
-                    <div className={"grow border border-white"}>
-                        <div className={"flex flex-col justify-center h-full"}>
-                            <div className={"aspect-video w-full max-h-min"}>
-                                <ReactPlayer
-                                    width={"100%"}
-                                    height="100%"
-                                    style={{objectFit: 'cover'}}
-                                    ref={ref}
-                                    url={videoSource}
-                                    controls={false}
-                                    playing={state.isPlaying}
-                                    volume={state.volume}
-                                    onProgress={() => onPlaying()}
-                                    loop={state.loop}
-                                />
-                            </div>
+                    videoSource != null &&
+                    <div className="grow border border-white relative">
+                        <div className="w-full relative h-full">
+                            <ReactPlayer
+                                width='100%'
+                                height='100%'
+                                ref={ref}
+                                url={videoSource}
+                                playing={state.isPlaying}
+                                controls={false}
+                                volume={state.volume}
+                                onProgress={onPlaying}
+                                loop={state.loop}
+                                className="object-cover"
+                            />
                         </div>
                     </div>
                 }
-                <div className={"basis-20 shrink-0"}>
-                    {/* <VideoPlayerControl/>*/}
+                <div className={"basis-14 shrink-0"}>
+                    <VideoPlayerControl/>
                 </div>
             </div>
         </div>

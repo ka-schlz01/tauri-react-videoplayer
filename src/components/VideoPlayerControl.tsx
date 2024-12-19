@@ -5,7 +5,7 @@ import {MdPlayArrow, MdSkipNext, MdSkipPrevious} from "react-icons/md";
 
 export default function VideoPlayerControl() {
     return (
-        <div className={"h-screen w-full bg-primary"}>
+        <div className={"w-full bg-primary"}>
             <div className={"w-full flex items-center justify-center"}>
                 <div className={"w-full flex justify-center"}>
                     <Slider
