@@ -4,5 +4,3 @@
 fn main() {
     tauri_react_videoplayer_lib::run()
 }
-
-
