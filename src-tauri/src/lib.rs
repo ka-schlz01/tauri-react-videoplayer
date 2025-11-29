@@ -1,10 +1,6 @@
 mod commands;
+mod db;
 
-// Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-#[tauri::command]
-fn greet(name: &str) -> String {
-    format!("Hello, {}! You've been greeted from Rust!", name)
-}
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
@@ -12,7 +8,20 @@ pub fn run() {
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_shell::init())
-        .invoke_handler(tauri::generate_handler![greet, commands::open_file_dialog])
+        .setup(| app | {
+            db::database::init_db()?;
+            Ok(())
+        })
+        .invoke_handler(tauri::generate_handler![
+            commands::greet,
+            commands::open_file_dialog,
+            commands::list_videos,
+            commands::get_video,
+            commands::add_video,
+            commands::increment_view,
+            commands::add_like,
+            commands::add_rating
+        ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");
 }
