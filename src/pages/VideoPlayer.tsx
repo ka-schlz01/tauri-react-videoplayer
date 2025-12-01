@@ -1,80 +1,56 @@
-import ReactPlayer from "react-player";
-import {useEffect, useRef, useState} from "react";
-import {useParams, useSearchParams} from "react-router";
+import { useEffect, useState } from "react";
+import { useSearchParams, useNavigate } from "react-router";
 import { convertFileSrc } from '@tauri-apps/api/core';
-import {appDataDir, BaseDirectory, join} from "@tauri-apps/api/path";
-import {readFile} from "@tauri-apps/plugin-fs";
-import VideoPlayerControl from "../components/VideoPlayerControl.tsx";
-import {Slider} from "@nextui-org/react";
-import {KeepAspect} from "../components/KeepAspect.tsx";
+import { CustomVideoPlayer } from "../components/CustomVideoPlayer";
+import { Button } from "../components/ui/button";
+import { HelpCircle } from "lucide-react";
 
-interface PlayerState {
-    isPlaying: boolean, volumeOpen: boolean, fullScreen: boolean, volume: number, showControls: boolean, loop: boolean, cinemaView: boolean
-}
+export default function VideoPlayer() {
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const [videoSource, setVideoSource] = useState<string | null>(null);
+    const [fileName, setFileName] = useState<string>("");
+    const [rawPath, setRawPath] = useState<string | null>(null);
 
-export default function VideoPlayer({autoplay = true}) {
-    let [searchParams] = useSearchParams();
-    const [videoSource, setVideoSource] = useState<string>()
-    const [state, setState] = useState<PlayerState>({
-        isPlaying: autoplay, volume: 0, fullScreen: false, volumeOpen: false, showControls: false, loop: false, cinemaView: false,
-    })
     useEffect(() => {
         async function fetchVideo() {
             const file = searchParams.get("file");
-            if(file) {
-                const filePath = await join(file, 'assets/video.mp4');
+            if (file) {
                 const src = convertFileSrc(file);
-                console.log(src)
-                setVideoSource(src)
+                setVideoSource(src);
+                setRawPath(file);
 
+                // Extract filename from path
+                const name = file.split(/[\\/]/).pop() || "Unknown Video";
+                setFileName(name);
             }
         }
         fetchVideo();
-    }, []);
-
-    const [time, setTime] = useState({duration: 0, played: 0})
-    const playerRef = useRef<ReactPlayer>();
-    const ref = (player: ReactPlayer) => {
-        playerRef.current = player;
-    };
+    }, [searchParams]);
 
     return (
-        <div className={"bg-primary h-screen w-full"}>
-            <div className={"flex flex-col h-full"}>
-                {
-                    videoSource != null &&
-                    <div className="grow border border-white relative">
-                        <div className="w-full relative h-full">
-                            <ReactPlayer
-                                width='100%'
-                                height='100%'
-                                ref={ref}
-                                url={videoSource}
-                                playing={state.isPlaying}
-                                controls={false}
-                                volume={state.volume}
-                                onProgress={onPlaying}
-                                loop={state.loop}
-                                className="object-cover"
-                            />
-                        </div>
+        <div className="p-6 flex-1 flex flex-col relative">
+            <div className="flex-1 relative rounded-2xl overflow-hidden shadow-2xl border border-white/5 bg-black">
+                {videoSource ? (
+                    <CustomVideoPlayer
+                        src={videoSource}
+                        title={fileName}
+                        autoPlay={true}
+                        filePath={rawPath || undefined}
+                    />
+                ) : (
+                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                        Loading video...
                     </div>
-                }
-                <div className={"basis-14 shrink-0"}>
-                    <VideoPlayerControl/>
-                </div>
+                )}
+            </div>
+
+            {/* Bottom Right Help */}
+            <div className="absolute bottom-6 right-6 z-50">
+                <Button variant="ghost" size="icon" className="rounded-full bg-secondary/50 hover:bg-secondary text-muted-foreground">
+                    <HelpCircle className="w-5 h-5" />
+                </Button>
             </div>
         </div>
     );
-
-    function onPlaying() {
-        if (playerRef.current) {
-            let copy = {...time};
-            copy.duration = playerRef.current.getDuration();
-            copy.played = playerRef.current?.getCurrentTime();
-            setTime(copy);
-        } else {
-            console.log("undef")
-        }
-    }
 }
