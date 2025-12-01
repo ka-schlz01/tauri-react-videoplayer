@@ -9,4 +9,5 @@ pub struct Video {
     pub duration: Option<i64>,
     pub rating: Option<f32>,
     pub watch_count: i64,
+    pub favorite: i64,
 }

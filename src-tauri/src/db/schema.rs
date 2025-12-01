@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS videos (
     added_at      DATETIME DEFAULT (datetime('now')),
     last_watched  DATETIME,
     watch_count   INTEGER DEFAULT 0,
-    rating        REAL
+    rating        REAL,
+    favorite      INTEGER DEFAULT 0
 );
 
 CREATE INDEX IF NOT EXISTS idx_path ON videos(path);

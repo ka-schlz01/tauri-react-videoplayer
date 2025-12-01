@@ -12,10 +12,14 @@ pub fn run() {
             db::database::init_db()?;
             Ok(())
         })
-        .invoke_handler(tauri::generate_handler![
+            .invoke_handler(tauri::generate_handler![
             commands::greet,
             commands::open_file_dialog,
             commands::list_videos,
+            commands::list_recent,
+            commands::pick_folder,
+            commands::read_dir_recursive,
+            commands::list_favorites,
             commands::get_video,
             commands::add_video,
             commands::increment_view,
