@@ -2,7 +2,7 @@ use rusqlite::params;
 use tauri_plugin_dialog::{DialogExt, FilePath};
 
 use crate::db::database;
-use crate::db::model::Video;
+use crate::db::model::{Video, Setting};
 use std::path::Path;
 use std::fs;
 
@@ -437,4 +437,43 @@ pub fn confirm_dialog(app: tauri::AppHandle, title: String, message: String) -> 
 
     let ok = matches!(result, rfd::MessageDialogResult::Yes);
     Ok(ok)
+}
+
+#[tauri::command]
+pub fn get_setting(key: String) -> Result<Option<String>, String> {
+    let conn = database::get_connection().lock().map_err(|e| e.to_string())?;
+    match conn.query_row("SELECT value FROM settings WHERE key = ?1", params![key], |row| row.get::<_, String>(0)) {
+        Ok(v) => Ok(Some(v)),
+        Err(rusqlite::Error::QueryReturnedNoRows) => Ok(None),
+        Err(e) => Err(e.to_string()),
+    }
+}
+
+#[tauri::command]
+pub fn set_setting(key: String, value: String) -> Result<(), String> {
+    let conn = database::get_connection().lock().map_err(|e| e.to_string())?;
+    conn.execute(
+        "INSERT INTO settings (key, value) VALUES (?1, ?2) ON CONFLICT(key) DO UPDATE SET value = excluded.value",
+        params![key, value],
+    )
+    .map_err(|e| e.to_string())?;
+    Ok(())
+}
+
+#[tauri::command]
+pub fn list_settings() -> Result<Vec<Setting>, String> {
+    let conn = database::get_connection().lock().map_err(|e| e.to_string())?;
+    let mut stmt = conn
+        .prepare("SELECT key, value FROM settings ORDER BY key ASC")
+        .map_err(|e| e.to_string())?;
+
+    let iter = stmt
+        .query_map([], |row| Ok(Setting { key: row.get(0)?, value: row.get(1)? }))
+        .map_err(|e| e.to_string())?;
+
+    let mut out = Vec::new();
+    for s in iter {
+        out.push(s.map_err(|e| e.to_string())?);
+    }
+    Ok(out)
 }

@@ -21,10 +21,18 @@ pub fn run() {
             commands::read_dir_recursive,
             commands::list_favorites,
             commands::get_video,
+            commands::get_video_by_path,
             commands::add_video,
             commands::increment_view,
             commands::add_like,
-            commands::add_rating
+            commands::add_rating,
+            commands::update_video_duration_by_path,
+            commands::delete_video,
+            commands::set_favorite,
+            commands::confirm_dialog,
+            commands::get_setting,
+            commands::set_setting,
+            commands::list_settings
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

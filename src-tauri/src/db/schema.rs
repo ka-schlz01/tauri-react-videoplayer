@@ -1,4 +1,14 @@
-use rusqlite::{Connection, Result};
+use rusqlite::Connection;
+use rusqlite::Result;
+
+
+pub const CREATE_SETTINGS_TABLE: &str = r#"
+CREATE TABLE IF NOT EXISTS settings (
+    key   TEXT PRIMARY KEY,
+    value TEXT NOT NULL
+);
+"#;
+
 
 pub const CREATE_VIDEOS_TABLE: &str = r#"
 CREATE TABLE IF NOT EXISTS videos (
@@ -20,6 +30,6 @@ CREATE INDEX IF NOT EXISTS idx_rating ON videos(rating);
 "#;
 
 pub fn init_schema(conn: &Connection) -> Result<()> {
-    conn.execute_batch(CREATE_VIDEOS_TABLE)?;
+    conn.execute_batch(&format!("{}\n{}", CREATE_VIDEOS_TABLE, CREATE_SETTINGS_TABLE))?;
     Ok(())
 }

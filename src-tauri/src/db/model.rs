@@ -11,3 +11,9 @@ pub struct Video {
     pub watch_count: i64,
     pub favorite: i64,
 }
+
+#[derive(Debug, Serialize)]
+pub struct Setting {
+    pub key: String,
+    pub value: String,
+}
