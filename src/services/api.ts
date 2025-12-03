@@ -11,6 +11,11 @@ export interface Video {
     favorite?: number | null;
 }
 
+export interface Setting {
+    key: string;
+    value: string;
+}
+
 export class Api {
     openFileDialog(): Promise<string> {
         return invoke('open_file_dialog') as Promise<string>;
@@ -82,5 +87,18 @@ export class Api {
 
     confirmDialog(title: string, message: string): Promise<boolean> {
         return invoke('confirm_dialog', { title, message }) as Promise<boolean>;
+    }
+
+    // Settings commands
+    getSetting(key: string): Promise<string | null> {
+        return invoke('get_setting', { key }) as Promise<string | null>;
+    }
+
+    setSetting(key: string, value: string): Promise<void> {
+        return invoke('set_setting', { key, value }) as Promise<void>;
+    }
+
+    listSettings(): Promise<Setting[]> {
+        return invoke('list_settings') as Promise<Setting[]>;
     }
 }

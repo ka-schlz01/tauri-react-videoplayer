@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import useApi from './hooks/useApi';
+import useSettingsStore from './stores/settingsStore';
 import "./styles/index.css";
 import { BrowserRouter, Route, Routes, Outlet, useNavigate } from "react-router";
 import Start from "./pages/Start.tsx";
@@ -75,9 +77,23 @@ function SidebarIcon({ icon: Icon, active, onClick }: { icon: any, active?: bool
 }
 
 function App() {
+    const api = useApi();
+
     useEffect(() => {
-        import("./lib/theme").then((m) => m.initTheme());
-    }, []);
+        api.listSettings().then((list) => {
+            const map: Record<string, string> = {};
+            list.forEach(s => map[s.key] = s.value);
+            const setAll = useSettingsStore.getState().setAll;
+            setAll(map).catch(() => {});
+        }).catch(() => {
+            api.getSetting('theme').then((v) => {
+                if (v === 'dark' || v === 'light') {
+                    const setTheme = useSettingsStore.getState().setTheme;
+                    setTheme(v).catch(() => {});
+                }
+            }).catch(() => {});
+        });
+    }, [api]);
 
     return (
         <main className={"overflow-hidden"}>
